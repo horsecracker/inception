@@ -21,6 +21,8 @@ from __future__ import print_function
 
 
 from inception.dataset import Dataset
+import tensorflow as tf
+
 #from dataset import Dataset
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('data_dir','/scratch1/liliyu/cancer/inception/data-density/processed/',
