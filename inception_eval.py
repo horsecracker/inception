@@ -27,7 +27,7 @@ import time
 import numpy as np
 import tensorflow as tf
 
-from inception import image_processing
+from inception import image_processing_LL as image_processing
 from inception import inception_model as inception
 
 

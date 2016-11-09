@@ -30,7 +30,7 @@ import tensorflow as tf
 import image_processing
 import inception_model as inception
 '''
-from inception import image_processing
+from inception import image_processing_LL as image_processing
 from inception import inception_model as inception
 from inception.slim import slim
 
