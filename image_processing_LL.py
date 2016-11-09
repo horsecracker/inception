@@ -44,7 +44,8 @@ import tensorflow as tf
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_integer('batch_size', 32,
+'''
+tf.app.flags.DEFINE_integer('batch_size', 96,
                             """Number of images to process in a batch.""")
 tf.app.flags.DEFINE_integer('image_size', 299,
                             """Provide square images of this size.""")
@@ -53,6 +54,8 @@ tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
                             """Please make this a multiple of 4.""")
 tf.app.flags.DEFINE_integer('num_readers', 4,
                             """Number of parallel readers during train.""")
+tf.app.flags.DEFINE_boolean('distort', False, """weather distort the image or not""")
+
 
 # Images are preprocessed asynchronously using multiple threads specified by
 # --num_preprocss_threads and the resulting processed images are stored in a
@@ -64,12 +67,12 @@ tf.app.flags.DEFINE_integer('num_readers', 4,
 # of 1024*16 images. Assuming RGB 299x299 images, this implies a queue size of
 # 16GB. If the machine is memory limited, then decrease this factor to
 # decrease the CPU memory footprint, accordingly.
-tf.app.flags.DEFINE_integer('input_queue_memory_factor', 16,
+tf.app.flags.DEFINE_integer('input_queue_memory_factor', 1,
                             """Size of the queue of preprocessed images. """
                             """Default is ideal but try smaller values, e.g. """
                             """4, 2 or 1, if host memory is constrained. See """
                             """comments in code for more details.""")
-
+'''
 
 def inputs(dataset, batch_size=None, num_preprocess_threads=None):
   """Generate batches of ImageNet images for evaluation.
@@ -233,9 +236,9 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
         tf.shape(image),
         bounding_boxes=bbox,
-        min_object_covered=0.1,
-        aspect_ratio_range=[0.75, 1.33],
-        area_range=[0.05, 1.0],
+        min_object_covered=0.8,
+        aspect_ratio_range=[0.9, 1.1],
+        area_range=[0.6, 1.0],
         max_attempts=100,
         use_image_if_no_bounding_boxes=True)
     bbox_begin, bbox_size, distort_bbox = sample_distorted_bounding_box
@@ -246,27 +249,27 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
                        image_with_distorted_box)
 
     # Crop the image to the specified bounding box.
-    distorted_image = tf.slice(image, bbox_begin, bbox_size)
+    distorted_image = tf.slice(image, bbox_begin, bbox_size)   #############=================
 
     # This resizing operation may distort the images because the aspect
     # ratio is not respected. We select a resize method in a round robin
     # fashion based on the thread number.
     # Note that ResizeMethod contains 4 enumerated resizing methods.
     resize_method = thread_id % 4
-    distorted_image = tf.image.resize_images(distorted_image, height, width,
-                                             resize_method)
+    distorted_image = tf.image.resize_images(distorted_image,[height, width],
+                                             resize_method)     #############==================
     # Restore the shape since the dynamic slice based upon the bbox_size loses
     # the third dimension.
-    distorted_image.set_shape([height, width, 3])
+    distorted_image.set_shape([height, width, 3])               #############=================
     if not thread_id:
       tf.image_summary('cropped_resized_image',
                        tf.expand_dims(distorted_image, 0))
 
     # Randomly flip the image horizontally.
-    distorted_image = tf.image.random_flip_left_right(distorted_image)
+    distorted_image = tf.image.random_flip_left_right(distorted_image) #############=================
 
     # Randomly distort the colors.
-    distorted_image = distort_color(distorted_image, thread_id)
+    #distorted_image = distort_color(distorted_image, thread_id)   #############=================
 
     if not thread_id:
       tf.image_summary('final_distorted_image',
@@ -288,7 +291,7 @@ def eval_image(image, height, width, scope=None):
   with tf.op_scope([image, height, width], scope, 'eval_image'):
     # Crop the central region of the image with an area containing 87.5% of
     # the original image.
-    image = tf.image.central_crop(image, central_fraction=0.875)
+    image = tf.image.central_crop(image, central_fraction=0.975) #0.875)
 
     # Resize the image to the original height and width.
     image = tf.expand_dims(image, 0)
@@ -323,7 +326,11 @@ def image_preprocessing(image_buffer, bbox, train, thread_id=0):
   width = FLAGS.image_size
 
   if train:
-    image = distort_image(image, height, width, bbox, thread_id)
+    if FLAGS.distort:
+	print( 'image distortion')
+    	image = distort_image(image, height, width, bbox, thread_id)
+    else:
+	image=eval_image(image, height, width)
   else:
     image = eval_image(image, height, width)
 
