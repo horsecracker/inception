@@ -44,9 +44,9 @@ import tensorflow as tf
 
 FLAGS = tf.app.flags.FLAGS
 
-'''
-tf.app.flags.DEFINE_integer('batch_size', 96,
+tf.app.flags.DEFINE_integer('batch_size', 32,
                             """Number of images to process in a batch.""")
+'''
 tf.app.flags.DEFINE_integer('image_size', 299,
                             """Provide square images of this size.""")
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,

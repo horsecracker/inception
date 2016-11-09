@@ -73,7 +73,7 @@ tf.app.flags.DEFINE_string('pretrained_model_checkpoint_path', '/scratch1/liliyu
 # With 8 Tesla K40's and a batch size = 256, the following setup achieves
 # precision@1 = 73.5% after 100 hours and 100K steps (20 epochs).
 # Learning rate decay factor selected from http://arxiv.org/abs/1404.5997.
-tf.app.flags.DEFINE_float('initial_learning_rate', 0.001,
+tf.app.flags.DEFINE_float('initial_learning_rate', 0.0005,
                           """Initial learning rate.""")
 tf.app.flags.DEFINE_float('num_epochs_per_decay', 20.0,
                           """Epochs after which learning rate decays.""")
@@ -91,7 +91,7 @@ tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
 tf.app.flags.DEFINE_integer('num_readers', 4,
                             """Number of parallel readers during train.""")
 
-tf.app.flags.DEFINE_boolean('distort', True, """weather distort the image or not""")
+tf.app.flags.DEFINE_boolean('distort', False, """weather distort the image or not""")
 
 
 # Images are preprocessed asynchronously using multiple threads specified by
