@@ -30,6 +30,7 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('eval_dir', '',
                            """Directory where to write event logs.""")
+
 tf.app.flags.DEFINE_string('checkpoint_dir', '/scratch1/liliyu/cancer/inception/train_output/distortion/',
                            """Directory where to read model checkpoints.""")
 
